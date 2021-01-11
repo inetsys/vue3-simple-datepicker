@@ -7,7 +7,7 @@
             Disable
         </label>
     </div>
-    <pre>Value: {{ example01.value }}</pre>
+    <pre>Value: {{ example01Formatted }}</pre>
 
     <h2>2.- Pop-up</h2>
     <button @click="example02Toggle">Open calendar</button>
@@ -24,11 +24,11 @@
             <button type="button" class="btn-close" @click="example02Close">Close</button>
         </template>
     </datepicker>
-    <pre>Value: {{ example02.value }}</pre>
+    <pre>Value: {{ example02Formatted }}</pre>
 
     <h2>3.- Spanish</h2>
     <datepicker v-model="example03.value" :locale="example03.locale" />
-    <pre>Value: {{ example03.value }}</pre>
+    <pre>Value: {{ example03Formatted }}</pre>
 </template>
 
 <script>
@@ -57,6 +57,17 @@ export default {
             },
         }
     },
+    computed: {
+        example01Formatted() {
+            return this.example01.value ? format(this.example01.value, 'dd MMM yyyy') : ''
+        },
+        example02Formatted() {
+            return this.example02.value ? format(this.example02.value, 'dd MMM yyyy') : ''
+        },
+        example03Formatted() {
+            return this.example03.value ? format(this.example03.value, 'dd MMM yyyy', { locale: this.example03.locale }) : ''
+        },
+    },
     methods: {
         example02Toggle() {
             this.example02.visible = !this.example02.visible
@@ -70,7 +81,7 @@ export default {
             this.example02Close()
         },
         example02SetToday() {
-            this.example02.value = format(new Date(), 'yyyy-MM-dd')
+            this.example02.value = new Date()
             this.example02Close()
         },
         example02Close() {

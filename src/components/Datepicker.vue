@@ -43,22 +43,26 @@
 
 <script>
 import {
-    eachDayOfInterval,
-    endOfMonth,
-    endOfWeek,
-    startOfMonth,
-    startOfWeek,
     format,
     isEqual,
     isSameMonth,
-    parse,
-    setDate,
-    addMonths,
-    subMonths,
-    subYears,
-    addYears,
     isWeekend,
     isValid,
+    eachDayOfInterval,
+    endOfWeek,
+    endOfMonth,
+    startOfWeek,
+    startOfMonth,
+    addMonths,
+    subMonths,
+    addYears,
+    subYears,
+    getDate,
+    getMonth,
+    getYear,
+    setDate,
+    setMonth,
+    setYear,
 } from 'date-fns'
 import { enGB as defaultLocale } from 'date-fns/locale'
 
@@ -72,12 +76,8 @@ export default {
             default: false,
         },
         modelValue: {
-            type: String,
+            type: Date,
             default: null,
-        },
-        internalFormat: {
-            type: String,
-            default: 'yyyy-MM-dd',
         },
         locale: {
             type: Object,
@@ -90,7 +90,7 @@ export default {
         for (let index = 0; index < 12; index++) {
             months.push({
                 label: this.locale.localize.month(index, {}),
-                value: index + 1,
+                value: index,
             })
         }
         const weekDays = []
@@ -112,24 +112,17 @@ export default {
         }
     },
     computed: {
-        parsedModelValue() {
-            if (!this.modelValue) {
-                return null
-            }
-
-            return parse(this.modelValue, 'yyyy-MM-dd', new Date())
-        },
         isModelValueValid() {
-            return isValid(new Date(this.modelValue))
+            return this.modelValue ? isValid(this.modelValue) : true
         },
         currentYear() {
-            return parseInt(format(this.currentDate, 'yyyy'))
+            return getYear(this.currentDate)
         },
         currentMonth() {
             return format(this.currentDate, 'MMMM', { locale: this.locale })
         },
         currentDay() {
-            return this.currentDate.getDate()
+            return getDate(this.currentDate)
         },
     },
     methods: {
@@ -138,17 +131,17 @@ export default {
         },
 
         selectYear(year) {
-            this.currentDate = parse(year, 'yyyy', this.currentDate)
+            this.currentDate = setYear(this.currentDate, year)
             this.showMonthsPanel()
         },
         selectMonth(month) {
-            this.currentDate = parse(month, 'M', this.currentDate)
+            this.currentDate = setMonth(this.currentDate, month)
             this.showDaysPanel()
         },
         selectDate(date) {
             this.currentDate = setDate(date, 15)
             if (!this.disabled) {
-                this.$emit('update:modelValue', format(date, this.internalFormat))
+                this.$emit('update:modelValue', date)
             }
         },
 
@@ -167,7 +160,7 @@ export default {
                 return {
                     label: format(day, 'd'),
                     value: day,
-                    selected: vm.parsedModelValue && isEqual(day, vm.parsedModelValue),
+                    selected: vm.modelValue && isEqual(day, vm.modelValue),
                     dimmed: !isSameMonth(day, vm.currentDate),
                     weekend: isWeekend(day),
                 }
@@ -177,8 +170,8 @@ export default {
             this.activePanel = 'months'
 
             this.months.forEach(month => {
-                month.selected = this.parsedModelValue
-                    ? this.parsedModelValue.getFullYear() === this.currentDate.getFullYear() && this.parsedModelValue.getMonth() + 1 === month.value
+                month.selected = this.modelValue
+                    ? getYear(this.modelValue) === getYear(this.currentDate) && getMonth(this.modelValue) === month.value
                     : false
             })
         },
@@ -189,7 +182,7 @@ export default {
                 years.push({
                     label: year,
                     value: year,
-                    selected: this.parsedModelValue ? this.parsedModelValue.getFullYear() === year : false,
+                    selected: this.modelValue ? getYear(this.modelValue) === year : false,
                 })
             }
             this.years = years
@@ -224,12 +217,12 @@ export default {
     },
     watch: {
         modelValue(newValue, oldValue) {
-            this.currentDate = setDate(this.parsedModelValue || new Date(), 15)
+            this.currentDate = setDate(this.modelValue || new Date(), 15)
             this.showCalendar()
         },
     },
     created() {
-        this.currentDate = setDate(this.parsedModelValue || new Date(), 15)
+        this.currentDate = setDate(this.modelValue || new Date(), 15)
         this.showCalendar()
     },
 }
