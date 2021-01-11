@@ -1,6 +1,6 @@
 {
   "name": "@inetsys/vue3-simple-datepicker",
-  "version": "1.0.0-dev",
+  "version": "1.0.0-alpha.0",
   "main": "dist/vue3-simple-datepicker.common.js",
   "module": "src/main.js",
   "scripts": {
