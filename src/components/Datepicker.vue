@@ -66,7 +66,7 @@ import {
 } from 'date-fns'
 import { enGB as defaultLocale } from 'date-fns/locale'
 
-import sdpPanel from './Panel.vue'
+import sdpPanel from './sdpPanel.vue'
 
 export default {
     components: { sdpPanel },
@@ -217,12 +217,12 @@ export default {
     },
     watch: {
         modelValue(newValue, oldValue) {
-            this.currentDate = setDate(this.modelValue || new Date(), 15)
+            this.currentDate = setDate(this.modelValue && this.isModelValueValid ? this.modelValue : new Date(), 15)
             this.showCalendar()
         },
     },
     created() {
-        this.currentDate = setDate(this.modelValue || new Date(), 15)
+        this.currentDate = setDate(this.modelValue && this.isModelValueValid ? this.modelValue : new Date(), 15)
         this.showCalendar()
     },
 }

@@ -34,7 +34,7 @@
 <script>
 import { format } from 'date-fns'
 import { es as spanishLocale } from 'date-fns/locale'
-import Datepicker from '@/components/Datepicker.vue'
+import Datepicker from '@/main.js'
 
 export default {
     name: 'Demo',
