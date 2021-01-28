@@ -29,6 +29,14 @@
     <h2>3.- Spanish</h2>
     <datepicker v-model="example03.value" :locale="example03.locale" />
     <pre>Value: {{ example03Formatted }}</pre>
+
+    <h2>4.- Partial date</h2>
+    <h3>Only year</h3>
+    <datepicker v-model="example04.valueA" pick-from="year" />
+    <pre>Value: {{ example04AFormatted }}</pre>
+    <h3>Month & year</h3>
+    <datepicker v-model="example04.valueB" pick-from="month" />
+    <pre>Value: {{ example04BFormatted }}</pre>
 </template>
 
 <script>
@@ -55,6 +63,10 @@ export default {
                 value: null,
                 locale: spanishLocale,
             },
+            example04: {
+                valueA: null,
+                valueB: null,
+            },
         }
     },
     computed: {
@@ -66,6 +78,12 @@ export default {
         },
         example03Formatted() {
             return this.example03.value ? format(this.example03.value, 'dd MMM yyyy', { locale: this.example03.locale }) : ''
+        },
+        example04AFormatted() {
+            return this.example04.valueA ? format(this.example04.valueA, 'yyyy') : ''
+        },
+        example04BFormatted() {
+            return this.example04.valueB ? format(this.example04.valueB, 'MMM yyyy') : ''
         },
     },
     methods: {

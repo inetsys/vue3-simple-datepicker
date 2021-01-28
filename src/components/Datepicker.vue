@@ -4,7 +4,7 @@
             <slot name="header" />
         </div>
 
-        <div class="sdp-datepicker--panel" v-if="activePanel === 'days'">
+        <div class="sdp-datepicker--panel" v-if="panelDaysVisible">
             <div class="sdp-datepicker--panel--top">
                 <button type="button" class="sdp-datepicker--btn--previous-month" @click="previousMonth">◀</button>
                 <button type="button" class="sdp-datepicker--btn--month" @click="showMonthsPanel">{{ currentMonth }} {{ currentYear }}</button>
@@ -16,7 +16,7 @@
             <sdp-panel class="sdp-datepicker--panel--days" :items="days" @select="selectDate" />
         </div>
 
-        <div class="sdp-datepicker--panel" v-if="activePanel === 'months'">
+        <div class="sdp-datepicker--panel" v-if="panelMonthsVisible">
             <div class="sdp-datepicker--panel--top">
                 <button type="button" class="sdp-datepicker--btn--previous-year" @click="previousYear">◀</button>
                 <button type="button" class="sdp-datepicker--btn--year" @click="showYearsPanel">{{ currentYear }}</button>
@@ -25,7 +25,7 @@
             <sdp-panel class="sdp-datepicker--panel--months" :items="months" @select="selectMonth" />
         </div>
 
-        <div class="sdp-datepicker--panel" v-if="activePanel === 'years'">
+        <div class="sdp-datepicker--panel" v-if="panelYearsVisible">
             <div class="sdp-datepicker--panel--top">
                 <button type="button" class="sdp-datepicker--btn--previous-years" @click="previousYears">▲</button>
             </div>
@@ -65,8 +65,11 @@ import {
     setYear,
 } from 'date-fns'
 import { enGB as defaultLocale } from 'date-fns/locale'
-
 import sdpPanel from './sdpPanel.vue'
+
+const DAYS = 1
+const MONTHS = 2
+const YEARS = 3
 
 export default {
     components: { sdpPanel },
@@ -82,6 +85,10 @@ export default {
         locale: {
             type: Object,
             default: defaultLocale,
+        },
+        pickFrom: {
+            type: String,
+            default: 'day',
         },
     },
     emits: ['update:modelValue'],
@@ -103,7 +110,7 @@ export default {
         }
 
         return {
-            activePanel: 'days',
+            activePanel: null,
             currentDate: new Date(),
             days: [],
             months,
@@ -112,6 +119,21 @@ export default {
         }
     },
     computed: {
+        pickPanel() {
+            let level
+            switch (this.pickFrom.toLowerCase()) {
+                case 'year':
+                    level = YEARS
+                    break
+                case 'month':
+                    level = MONTHS
+                    break
+                default:
+                    level = DAYS
+            }
+
+            return level
+        },
         isModelValueValid() {
             return this.modelValue ? isValid(this.modelValue) : true
         },
@@ -124,30 +146,60 @@ export default {
         currentDay() {
             return getDate(this.currentDate)
         },
+        panelDaysVisible() {
+            return this.activePanel === DAYS
+        },
+        panelMonthsVisible() {
+            return this.activePanel === MONTHS
+        },
+        panelYearsVisible() {
+            return this.activePanel === YEARS
+        },
     },
     methods: {
         showCalendar() {
-            this.showDaysPanel()
+            if (this.pickPanel === YEARS) {
+                this.showYearsPanel()
+            }
+            else if (this.pickPanel === MONTHS) {
+                this.showMonthsPanel()
+            }
+            else {
+                this.showDaysPanel()
+            }
         },
-
-        selectYear(year) {
-            this.currentDate = setYear(this.currentDate, year)
-            this.showMonthsPanel()
-        },
-        selectMonth(month) {
-            this.currentDate = setMonth(this.currentDate, month)
-            this.showDaysPanel()
-        },
-        selectDate(date) {
-            this.currentDate = setDate(date, 15)
+        updateModel(date) {
             if (!this.disabled) {
                 this.$emit('update:modelValue', date)
             }
         },
 
+        selectYear(year) {
+            this.currentDate = setYear(this.currentDate, year)
+            if (this.pickPanel < YEARS) {
+                this.showMonthsPanel()
+            }
+            else {
+                this.updateModel(this.currentDate)
+            }
+        },
+        selectMonth(month) {
+            this.currentDate = setMonth(this.currentDate, month)
+            if (this.pickPanel < MONTHS) {
+                this.showDaysPanel()
+            }
+            else {
+                this.updateModel(this.currentDate)
+            }
+        },
+        selectDate(date) {
+            this.currentDate = setDate(date, 15)
+            this.updateModel(date)
+        },
+
         showDaysPanel() {
             const vm = this
-            this.activePanel = 'days'
+            this.activePanel = DAYS
 
             this.days = eachDayOfInterval({
                 start: startOfWeek(startOfMonth(this.currentDate), {
@@ -167,7 +219,7 @@ export default {
             })
         },
         showMonthsPanel() {
-            this.activePanel = 'months'
+            this.activePanel = MONTHS
 
             this.months.forEach(month => {
                 month.selected = this.modelValue
@@ -176,7 +228,7 @@ export default {
             })
         },
         showYearsPanel() {
-            this.activePanel = 'years'
+            this.activePanel = YEARS
             const years = []
             for (let year = this.currentYear - 4; year <= this.currentYear + 4; year++) {
                 years.push({
