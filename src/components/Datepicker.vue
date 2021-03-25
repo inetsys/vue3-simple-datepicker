@@ -13,7 +13,11 @@
             <div class="sdp-datepicker--week-days">
                 <span v-for="(item, index) of weekDays" :key="index" :class="{ weekend: item.weekend }">{{ item.value }}</span>
             </div>
-            <sdp-panel class="sdp-datepicker--panel--days" :items="days" @select="selectDate" />
+            <sdp-panel class="sdp-datepicker--panel--days"
+                :items="days"
+                :selected="selectedDay"
+                @select="selectDate"
+            />
         </div>
 
         <div class="sdp-datepicker--panel" v-if="panelMonthsVisible">
@@ -22,14 +26,22 @@
                 <button type="button" class="sdp-datepicker--btn--year" @click="showYearsPanel">{{ currentYear }}</button>
                 <button type="button" class="sdp-datepicker--btn--next-year" @click="nextYear">▶</button>
             </div>
-            <sdp-panel class="sdp-datepicker--panel--months" :items="months" @select="selectMonth" />
+            <sdp-panel class="sdp-datepicker--panel--months"
+                :items="months"
+                :selected="selectedMonth"
+                @select="selectMonth"
+            />
         </div>
 
         <div class="sdp-datepicker--panel" v-if="panelYearsVisible">
             <div class="sdp-datepicker--panel--top">
                 <button type="button" class="sdp-datepicker--btn--previous-years" @click="previousYears">▲</button>
             </div>
-            <sdp-panel class="sdp-datepicker--panel--years" :items="years" @select="selectYear" />
+            <sdp-panel class="sdp-datepicker--panel--years"
+                :items="years"
+                :selected="selectedYear"
+                @select="selectYear"
+            />
             <div class="sdp-datepicker--panel--top">
                 <button type="button" class="sdp-datepicker--btn--next-years" @click="nextYears">▼</button>
             </div>
@@ -44,7 +56,6 @@
 <script>
 import {
     format,
-    isEqual,
     isSameMonth,
     isWeekend,
     isValid,
@@ -93,32 +104,48 @@ export default {
     },
     emits: ['update:modelValue'],
     data() {
-        const months = []
-        for (let index = 0; index < 12; index++) {
-            months.push({
-                label: this.locale.localize.month(index, {}),
-                value: index,
-            })
-        }
-        const weekDays = []
-        for (let index = 0; index < 7; index++) {
-            const dayCode = (index + this.locale.options.weekStartsOn) % 7
-            weekDays.push({
-                value: this.locale.localize.day(dayCode, { width: 'narrow' }),
-                weekend: dayCode === 0 || dayCode === 6,
-            })
-        }
-
         return {
             activePanel: null,
             currentDate: new Date(),
             days: [],
-            months,
-            weekDays,
             years: [],
         }
     },
     computed: {
+        selectedDay() {
+            return this.modelValue
+        },
+        selectedMonth() {
+            return this.modelValue && getYear(this.modelValue) === getYear(this.currentDate) && getMonth(this.modelValue) === getMonth(this.currentDate)
+                ? getMonth(this.currentDate)
+                : null
+        },
+        selectedYear() {
+            return this.modelValue ? getYear(this.modelValue) : null
+        },
+        months() {
+            const months = []
+            for (let index = 0; index < 12; index++) {
+                months.push({
+                    label: this.locale.localize.month(index, {}),
+                    value: index,
+                })
+            }
+
+            return months
+        },
+        weekDays() {
+            const weekDays = []
+            for (let index = 0; index < 7; index++) {
+                const dayCode = (index + this.locale.options.weekStartsOn) % 7
+                weekDays.push({
+                    value: this.locale.localize.day(dayCode, { width: 'narrow' }),
+                    weekend: dayCode === 0 || dayCode === 6,
+                })
+            }
+
+            return weekDays
+        },
         pickPanel() {
             let level
             switch (this.pickFrom.toLowerCase()) {
@@ -212,7 +239,6 @@ export default {
                 return {
                     label: format(day, 'd'),
                     value: day,
-                    selected: vm.modelValue && isEqual(day, vm.modelValue),
                     dimmed: !isSameMonth(day, vm.currentDate),
                     weekend: isWeekend(day),
                 }
@@ -220,12 +246,6 @@ export default {
         },
         showMonthsPanel() {
             this.activePanel = MONTHS
-
-            this.months.forEach(month => {
-                month.selected = this.modelValue
-                    ? getYear(this.modelValue) === getYear(this.currentDate) && getMonth(this.modelValue) === month.value
-                    : false
-            })
         },
         showYearsPanel() {
             this.activePanel = YEARS
@@ -234,7 +254,6 @@ export default {
                 years.push({
                     label: year,
                     value: year,
-                    selected: this.modelValue ? getYear(this.modelValue) === year : false,
                 })
             }
             this.years = years

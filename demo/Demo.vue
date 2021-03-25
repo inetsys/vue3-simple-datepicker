@@ -26,8 +26,31 @@
     </datepicker>
     <pre>Value: {{ example02Formatted }}</pre>
 
-    <h2>3.- Spanish</h2>
-    <datepicker v-model="example03.value" :locale="example03.locale" />
+    <h2>3.- I18n</h2>
+    <datepicker v-model="example03.value" :locale="example03Locale" />
+    <div>
+        <label>
+            <input type="radio"
+                name="example03lang"
+                value="es"
+                v-model="example03.lang"
+            > Spanish
+        </label>
+        <label>
+            <input type="radio"
+                name="example03lang"
+                value="fr"
+                v-model="example03.lang"
+            > French
+        </label>
+        <label>
+            <input type="radio"
+                name="example03lang"
+                value="de"
+                v-model="example03.lang"
+            > German
+        </label>
+    </div>
     <pre>Value: {{ example03Formatted }}</pre>
 
     <h2>4.- Partial date</h2>
@@ -41,7 +64,11 @@
 
 <script>
 import { format } from 'date-fns'
-import { es as spanishLocale } from 'date-fns/locale'
+import {
+    es as spanishLocale,
+    fr as frenchLocale,
+    de as germanLocale,
+} from 'date-fns/locale'
 import Datepicker from '@/main.js'
 
 export default {
@@ -61,7 +88,7 @@ export default {
             },
             example03: {
                 value: null,
-                locale: spanishLocale,
+                lang: 'es',
             },
             example04: {
                 valueA: null,
@@ -76,8 +103,17 @@ export default {
         example02Formatted() {
             return this.example02.value ? format(this.example02.value, 'dd MMM yyyy') : ''
         },
+        example03Locale() {
+            const locales = {
+                es: spanishLocale,
+                fr: frenchLocale,
+                de: germanLocale,
+            }
+
+            return locales[this.example03.lang] || null
+        },
         example03Formatted() {
-            return this.example03.value ? format(this.example03.value, 'dd MMM yyyy', { locale: this.example03.locale }) : ''
+            return this.example03.value ? format(this.example03.value, 'dd MMM yyyy', { locale: this.example03Locale }) : ''
         },
         example04AFormatted() {
             return this.example04.valueA ? format(this.example04.valueA, 'yyyy') : ''
