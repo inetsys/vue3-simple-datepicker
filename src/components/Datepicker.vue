@@ -13,7 +13,7 @@
             <div class="sdp-datepicker--week-days">
                 <span v-for="(item, index) of weekDays" :key="index" :class="{ weekend: item.weekend }">{{ item.value }}</span>
             </div>
-            <sdp-panel class="sdp-datepicker--panel--days"
+            <sdpPanel class="sdp-datepicker--panel--days"
                 :items="days"
                 :selected="selectedDay"
                 @select="selectDate"
@@ -26,7 +26,7 @@
                 <button type="button" class="sdp-datepicker--btn--year" @click="showYearsPanel">{{ currentYear }}</button>
                 <button type="button" class="sdp-datepicker--btn--next-year" @click="nextYear">▶</button>
             </div>
-            <sdp-panel class="sdp-datepicker--panel--months"
+            <sdpPanel class="sdp-datepicker--panel--months"
                 :items="months"
                 :selected="selectedMonth"
                 @select="selectMonth"
@@ -37,7 +37,7 @@
             <div class="sdp-datepicker--panel--top">
                 <button type="button" class="sdp-datepicker--btn--previous-years" @click="previousYears">▲</button>
             </div>
-            <sdp-panel class="sdp-datepicker--panel--years"
+            <sdpPanel class="sdp-datepicker--panel--years"
                 :items="years"
                 :selected="selectedYear"
                 @select="selectYear"
@@ -116,8 +116,8 @@ export default {
             return this.modelValue
         },
         selectedMonth() {
-            return this.modelValue && getYear(this.modelValue) === getYear(this.currentDate) && getMonth(this.modelValue) === getMonth(this.currentDate)
-                ? getMonth(this.currentDate)
+            return this.modelValue && getYear(this.modelValue) === getYear(this.currentDate)
+                ? getMonth(this.modelValue)
                 : null
         },
         selectedYear() {
