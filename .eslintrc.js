@@ -15,7 +15,13 @@ module.exports = {
     },
     rules: {
         'brace-style': ['error', 'stroustrup'],
-        'comma-dangle': ['warn', 'always-multiline'],
+        'comma-dangle': ['warn', {
+            arrays: 'always-multiline',
+            objects: 'always-multiline',
+            imports: 'always-multiline',
+            exports: 'always-multiline',
+            functions: 'never',
+        }],
         indent: ['warn', 4, {
             SwitchCase: 1,
         }],
